@@ -84,7 +84,7 @@ function LoginPage() {
       <div className="w-full max-w-5xl relative z-10">
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
           <div className="grid lg:grid-cols-2 gap-0">
-            
+
             {/* Left Section: Branding & Premium Info */}
             <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 text-white relative overflow-hidden">
               {/* Decorative Pattern */}
@@ -107,11 +107,10 @@ function LoginPage() {
                 </div>
 
                 <h1 className="text-4xl font-extrabold mb-4 leading-tight">
-                  ยินดีต้อนรับสู่<br />
-                  <span className="text-emerald-100">ระบบบริหารคลินิก</span>
+                  เข้าสู่ระบบเจ้าหน้าที่<br />
                 </h1>
                 <p className="text-emerald-50/90 text-lg mb-12 leading-relaxed">
-                  ระบบจัดการสถานพยาบาลครบวงจรที่ออกแบบมาเพื่อให้การดูแลคนไข้เป็นเรื่องง่ายและมีประสิทธิภาพสูงสุด
+                  ระบบจัดการข้อมูลและสนับสนุนการทำงานภายในคลินิก สำหรับแพทย์และบุคลากร
                 </p>
 
                 <div className="space-y-6">
@@ -120,8 +119,8 @@ function LoginPage() {
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-white mb-1">ฐานข้อมูลคนไข้</h4>
-                      <p className="text-emerald-50/80 text-sm">จัดการข้อมูลและประวัติการรักษาได้อย่างเป็นระบบ</p>
+                      <h4 className="font-semibold text-white mb-1">ทะเบียนประวัติคนไข้</h4>
+                      <p className="text-emerald-50/80 text-sm">ค้นหา ตรวจสอบ และจัดการเวชระเบียน</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -129,8 +128,8 @@ function LoginPage() {
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-white mb-1">ระบบนัดหมาย</h4>
-                      <p className="text-emerald-50/80 text-sm">จัดการคิวรอตรวจเรียลไทม์บนแดชบอร์ด</p>
+                      <h4 className="font-semibold text-white mb-1">คิวและตารางนัดหมาย</h4>
+                      <p className="text-emerald-50/80 text-sm">จัดการคิวรอตรวจและตารางแพทย์ประจำวัน</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -138,19 +137,13 @@ function LoginPage() {
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-white mb-1">ระบบบิล & ยา</h4>
-                      <p className="text-emerald-50/80 text-sm">POS ออกใบเสร็จและจัดการสต็อกยา</p>
+                      <h4 className="font-semibold text-white mb-1">ห้องยาและการเงิน</h4>
+                      <p className="text-emerald-50/80 text-sm">POS จัดการรายการยา ค่ารักษา และออกใบเสร็จ</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="relative z-10 pt-8 border-t border-white/20">
-                <p className="text-emerald-50/70 text-sm flex items-center gap-2">
-                  <span className="text-xl">⚡</span>
-                  ความแม่นยำและความเร็วในบริการคลินิก
-                </p>
-              </div>
             </div>
 
             {/* Right Section: Login Form */}
@@ -259,14 +252,14 @@ function LoginPage() {
                     )}
                   </button>
                 </form>
-                
+
               </div>
             </div>
 
           </div>
         </div>
 
-      
+
       </div>
     </div>
   )

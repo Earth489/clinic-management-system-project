@@ -6,11 +6,13 @@ function AdminHeader({ currentUser, userRole, onLogout, children }) {
   const menuItems = [
     { icon: '🏠', label: 'Dashboard', description: 'ข้อมูลรวมและรายงาน', path: '/dashboard-admin', active: window.location.pathname === '/dashboard-admin' },
     { icon: '👥', label: 'Patients', description: 'จัดการข้อมูลคนไข้', path: '/admin/patients', active: window.location.pathname === '/admin/patients' },
-    { icon: '📅', label: 'Appointments', description: 'จัดการนัดหมาย', path: '/appointments' },
-    { icon: '🏥', label: 'Clinic / Queue', description: 'จัดการคิวคลินิก', path: '/clinic-queue' },
-    { icon: '💊', label: 'Pharmacy', description: 'จัดการยาและเภสัชกรรม', path: '/pharmacy' },
-    { icon: '🧾', label: 'Billing', description: 'จัดการการเรียกเก็บเงิน', path: '/billing' },
-    { icon: '⚙️', label: 'Settings / Users', description: 'ตั้งค่าระบบและผู้ใช้', path: '/settings' }
+    { icon: '📅', label: 'Appointments', description: 'จัดการนัดหมาย', path: '/admin/appointments', active: window.location.pathname === '/admin/appointments' },
+    { icon: '🏥', label: 'Clinic / Queue', description: 'จัดการคิวคลินิก', path: '/admin/queue', active: window.location.pathname === '/admin/queue' },
+    { icon: '⚙️', label: 'ตั้งค่าคลินิก', description: 'เวลาทำการ ตารางเวร คิว', path: '/admin/settings', active: window.location.pathname === '/admin/settings' },
+    { icon: '👤', label: 'จัดการผู้ใช้', description: 'เพิ่ม/ลบ ผู้ใช้ในระบบ', path: '/admin/users', active: window.location.pathname === '/admin/users' },
+    { icon: '💊', label: 'Pharmacy', description: 'จัดการยาและเภสัชกรรม', path: '/admin/pharmacy', active: window.location.pathname === '/admin/pharmacy' },
+    { icon: '🧾', label: 'Billing', description: 'รายได้/ลบบิล/ค่าตอบแทนแพทย์', path: '/admin/billing', active: window.location.pathname === '/admin/billing' },
+    { icon: '📋', label: 'ประวัติการรักษา', description: 'ดูและแก้ไขประวัติ', path: '/admin/records', active: window.location.pathname === '/admin/records' }
   ]
 
   const handleMenuClick = (path) => {
@@ -65,11 +67,10 @@ function AdminHeader({ currentUser, userRole, onLogout, children }) {
                   <button
                     key={index}
                     onClick={() => handleMenuClick(item.path)}
-                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 ${
-                      item.active
+                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 ${item.active
                         ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-md'
                         : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-xl">{item.icon}</span>

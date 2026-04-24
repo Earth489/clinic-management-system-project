@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, setPersistence, browserSessionPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,6 +21,7 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // ──── ตั้งค่า Firebase เพื่อให้ auth token เก็บใน sessionStorage (auto clear เมื่อปิด browser)
 setPersistence(auth, browserSessionPersistence).catch((error) => {
@@ -28,4 +30,4 @@ setPersistence(auth, browserSessionPersistence).catch((error) => {
 
 console.log("Firebase initialized successfully:", app.name);
 
-export { app, analytics, auth, db };
+export { app, analytics, auth, db, storage };

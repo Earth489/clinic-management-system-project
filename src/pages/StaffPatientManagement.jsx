@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { db } from '../firebase'
+import { db, storage } from '../firebase'
 import StaffHeader from '../components/StaffHeader'
 import {
   collection,
@@ -14,6 +14,7 @@ import {
   query,
   orderBy
 } from 'firebase/firestore'
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 // ──────────────────────────────────────────────
 // Icons (inline SVG helpers)
@@ -56,6 +57,7 @@ const emptyForm = {
   hnnumber: '',
   firstname: '',
   lastname: '',
+  gender: '',
   birthdate: '',
   phonenumber: '',
   address: '',
@@ -82,6 +84,13 @@ function StaffPatientManagement() {
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [successMsg, setSuccessMsg] = useState('')
   const [logoutMsg, setLogoutMsg] = useState('')
+
+  // ── Files & EMR State ───────────────────────
+  const [showFileModal, setShowFileModal] = useState(false)
+  const [fileTargetPatient, setFileTargetPatient] = useState(null)
+  const [patientFiles, setPatientFiles] = useState([])
+  const [uploadingFile, setUploadingFile] = useState(false)
+  const [fileType, setFileType] = useState('เอกสารทั่วไป')
 
   // ── Real‑time listener ──────────────────────
   useEffect(() => {
@@ -133,6 +142,7 @@ function StaffPatientManagement() {
       hnnumber: patient.hnnumber || '',
       firstname: patient.firstname || '',
       lastname: patient.lastname || '',
+      gender: patient.gender || '',
       birthdate: patient.birthdate || '',
       phonenumber: patient.phonenumber || '',
       address: patient.address || '',
@@ -173,6 +183,7 @@ function StaffPatientManagement() {
           hnnumber: formData.hnnumber.trim(),
           firstname: formData.firstname.trim(),
           lastname: formData.lastname.trim(),
+          gender: formData.gender || '',
           birthdate: formData.birthdate,
           phonenumber: formData.phonenumber.trim(),
           address: formData.address.trim(),
@@ -186,6 +197,7 @@ function StaffPatientManagement() {
           hnnumber: formData.hnnumber.trim(),
           firstname: formData.firstname.trim(),
           lastname: formData.lastname.trim(),
+          gender: formData.gender || '',
           birthdate: formData.birthdate,
           phonenumber: formData.phonenumber.trim(),
           address: formData.address.trim(),
@@ -213,6 +225,66 @@ function StaffPatientManagement() {
     } catch (err) {
       console.error('Delete patient error:', err)
       alert('เกิดข้อผิดพลาด: ' + err.message)
+    }
+  }
+
+  // ── File Management (EMR) ───────────────────
+  const openFileModal = (patient) => {
+    setFileTargetPatient(patient)
+    setShowFileModal(true)
+  }
+
+  const closeFileModal = () => {
+    setShowFileModal(false)
+    setFileTargetPatient(null)
+    setPatientFiles([])
+  }
+
+  useEffect(() => {
+    if (!fileTargetPatient) return
+    const q = query(collection(db, `patients/${fileTargetPatient.id}/files`), orderBy('uploadedAt', 'desc'))
+    const unsub = onSnapshot(q, (snap) => {
+      setPatientFiles(snap.docs.map(d => ({id: d.id, ...d.data()})))
+    })
+    return () => unsub()
+  }, [fileTargetPatient])
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file || !fileTargetPatient) return
+    setUploadingFile(true)
+    try {
+      const fileName = `${Date.now()}_${file.name}`
+      const fileRef = ref(storage, `patients/${fileTargetPatient.id}/${fileName}`)
+      await uploadBytes(fileRef, file)
+      const url = await getDownloadURL(fileRef)
+      
+      await addDoc(collection(db, `patients/${fileTargetPatient.id}/files`), {
+        name: file.name,
+        path: fileRef.fullPath,
+        url,
+        type: fileType,
+        uploadedBy: currentUser.uid,
+        uploadedAt: serverTimestamp()
+      })
+      setSuccessMsg('อัปโหลดไฟล์สำเร็จ')
+    } catch (err) {
+      alert('Upload error: ' + err.message)
+    } finally {
+      setUploadingFile(false)
+      e.target.value = null // reset input
+    }
+  }
+
+  const handleDeleteFile = async (fileObj) => {
+    if(!confirm(`ยืนยันการลบไฟล์ ${fileObj.name}?`)) return
+    try {
+      const fileRef = ref(storage, fileObj.path)
+      await deleteObject(fileRef).catch(e => console.log('Storage delete error', e)) // ignore if already deleted from storage
+      await deleteDoc(doc(db, `patients/${fileTargetPatient.id}/files`, fileObj.id))
+      setSuccessMsg('ลบไฟล์เรียบร้อย')
+    } catch(err) {
+      alert('Delete file error: ' + err.message)
     }
   }
 
@@ -299,6 +371,7 @@ function StaffPatientManagement() {
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">HN</th>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">ชื่อ</th>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">นามสกุล</th>
+                <th className="px-4 py-3 font-semibold whitespace-nowrap">เพศ</th>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">วันเกิด</th>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">เบอร์โทร</th>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">ที่อยู่</th>
@@ -309,7 +382,7 @@ function StaffPatientManagement() {
             <tbody className="divide-y divide-gray-100">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center text-gray-400">
+                  <td colSpan="9" className="px-4 py-12 text-center text-gray-400">
                     <div className="flex flex-col items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-2.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -326,6 +399,7 @@ function StaffPatientManagement() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">{patient.firstname}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{patient.lastname}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">{patient.gender || '-'}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {patient.birthdate ? new Date(patient.birthdate).toLocaleDateString('th-TH') : '-'}
                     </td>
@@ -355,6 +429,13 @@ function StaffPatientManagement() {
                           title="แก้ไข"
                         >
                           <IconEdit />
+                        </button>
+                        <button
+                          onClick={() => openFileModal(patient)}
+                          className="p-2 rounded-lg text-amber-600 hover:bg-amber-50 transition-colors font-bold text-lg leading-none"
+                          title="เอกสาร/รูปภาพ EMR"
+                        >
+                          📁
                         </button>
                         {/* Only Admin can delete - Staff cannot */}
                         <button
@@ -448,6 +529,24 @@ function StaffPatientManagement() {
                     className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 transition-all text-sm"
                   />
                 </div>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  เพศ
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 transition-all text-sm bg-white"
+                >
+                  <option value="">ไม่ระบุ</option>
+                  <option value="ชาย">ชาย</option>
+                  <option value="หญิง">หญิง</option>
+                  <option value="อื่นๆ">อื่นๆ</option>
+                </select>
               </div>
 
               {/* Birth Date */}
@@ -578,6 +677,76 @@ function StaffPatientManagement() {
               >
                 ลบข้อมูล
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════
+          Modal: EMR Files
+         ════════════════════════════════════════ */}
+      {showFileModal && fileTargetPatient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeFileModal} />
+          
+          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden animate-[scaleIn_0.2s_ease]">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-white">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">📁 เวชระเบียนอิเล็กทรอนิกส์ (EMR)</h2>
+                <p className="text-sm text-gray-500 mt-1">แฟ้มผู้ป่วย: {fileTargetPatient.firstname} {fileTargetPatient.lastname} ({fileTargetPatient.hnnumber})</p>
+              </div>
+              <button onClick={closeFileModal} className="p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"><IconClose /></button>
+            </div>
+
+            <div className="p-6">
+              {/* Uploader */}
+              <div className="flex flex-col md:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-inner">
+                <select 
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500"
+                  value={fileType} onChange={e => setFileType(e.target.value)}
+                  disabled={uploadingFile}
+                >
+                  <option>เอกสารทั่วไป</option>
+                  <option>บัตรประชาชน/ใบส่งตัว</option>
+                  <option>Consent Form</option>
+                  <option>รูปภาพ Before/After</option>
+                </select>
+                <div className="relative flex-1">
+                  <input type="file" id="file-upload" className="hidden" onChange={handleFileUpload} disabled={uploadingFile} accept="image/*,.pdf,.doc,.docx" />
+                  <label htmlFor="file-upload" className={`cursor-pointer flex items-center justify-center gap-2 w-full py-2 bg-amber-500 text-white font-bold rounded-lg transition-all shadow-md ${uploadingFile ? 'opacity-50 pointer-events-none' : 'hover:bg-amber-600 active:scale-95'}`}>
+                    {uploadingFile ? 'กำลังอัปโหลด...' : '+ เลือกไฟล์เพื่ออัปโหลด'}
+                  </label>
+                </div>
+              </div>
+
+              {/* File List */}
+              <div className="max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {patientFiles.length === 0 ? (
+                     <div className="col-span-1 sm:col-span-2 text-center py-10 text-gray-400">ยังไม่มีเอกสารในแฟ้มผู้ป่วยนี้</div>
+                  ) : (
+                    patientFiles.map(f => (
+                      <div key={f.id} className="border border-gray-200 rounded-xl p-3 flex flex-col hover:shadow-md transition bg-white group">
+                        <div className="flex justify-between items-start mb-2">
+                           <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded">{f.type}</span>
+                           <button onClick={() => handleDeleteFile(f)} className="text-red-400 opacity-0 group-hover:opacity-100 hover:text-red-600 transition" title="ลบไฟล์">✕</button>
+                        </div>
+                        <a href={f.url} target="_blank" rel="noreferrer" className="flex-1 min-h-[60px] flex items-center gap-3">
+                           {f.name.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                             <div className="w-16 h-16 rounded-lg bg-gray-100 bg-cover bg-center border border-gray-200" style={{backgroundImage: `url(${f.url})`}}></div>
+                           ) : (
+                             <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center text-xl font-black shrink-0">📄</div>
+                           )}
+                           <div className="overflow-hidden">
+                             <p className="text-sm font-bold text-gray-700 truncate" title={f.name}>{f.name}</p>
+                             <p className="text-xs text-gray-400 mt-1">{f.uploadedAt?.seconds ? new Date(f.uploadedAt.seconds*1000).toLocaleString('th-TH') : '-'}</p>
+                           </div>
+                        </a>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

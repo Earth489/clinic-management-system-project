@@ -6,10 +6,11 @@ function StaffHeader({ currentUser, userRole, onLogout, children }) {
   const menuItems = [
     { icon: '🏠', label: 'Dashboard', description: 'หน้าแรกสำหรับจัดการงานประจำวัน', path: '/dashboard-staff', active: window.location.pathname === '/dashboard-staff' },
     { icon: '👥', label: 'Patients', description: 'จัดการข้อมูลคนไข้', path: '/staff/patients', active: window.location.pathname === '/staff/patients' },
-    { icon: '📅', label: 'Appointments', description: 'จัดการนัดหมาย', path: '/appointments' },
-    { icon: '🏥', label: 'Clinic / Queue', description: 'จัดการคิวคลินิก', path: '/clinic-queue' },
-    { icon: '💊', label: 'Pharmacy', description: 'จัดการยาและเภสัชกรรม', path: '/pharmacy' },
-    { icon: '🧾', label: 'POS & Billing', description: 'ระบบขายและเรียกเก็บเงิน', path: '/pos-billing' }
+    { icon: '📅', label: 'Appointments', description: 'จัดการนัดหมาย', path: '/staff/appointments', active: window.location.pathname === '/staff/appointments' },
+    { icon: '🏥', label: 'Clinic / Queue', description: 'จัดการคิวคลินิก', path: '/clinic-queue', active: window.location.pathname === '/clinic-queue' },
+    { icon: '💊', label: 'Pharmacy', description: 'จัดการยาและเภสัชกรรม', path: '/pharmacy', active: window.location.pathname === '/pharmacy' },
+    { icon: '🧾', label: 'POS & Billing', description: 'ระบบขายและเรียกเก็บเงิน', path: '/pos-billing', active: window.location.pathname === '/pos-billing' },
+    { icon: '📋', label: 'ประวัติการรักษา', description: 'ดูประวัติและค่าใช้จ่าย (Read-only)', path: '/staff/records', active: window.location.pathname === '/staff/records' }
   ]
 
   const handleMenuClick = (path) => {
@@ -19,9 +20,9 @@ function StaffHeader({ currentUser, userRole, onLogout, children }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 print:bg-white">
       {/* Top Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -44,9 +45,9 @@ function StaffHeader({ currentUser, userRole, onLogout, children }) {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 print:block print:gap-0">
           {/* Sidebar Navigation */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 print:hidden">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">เมนูหลัก</h2>
               <nav className="space-y-2">

@@ -6,10 +6,11 @@ function DoctorHeader({ currentUser, userRole, onLogout, children }) {
   const menuItems = [
     { icon: '🏠', label: 'Dashboard', description: 'หน้าแรกสำหรับแพทย์', path: '/dashboard-doctor', active: window.location.pathname === '/dashboard-doctor' },
     { icon: '👥', label: 'ข้อมูลคนไข้', description: 'ดูข้อมูลคนไข้', path: '/doctor/patients', active: window.location.pathname === '/doctor/patients' },
-    { icon: '📅', label: 'นัดหมาย', description: 'จัดการนัดหมายคนไข้', path: '/doctor/appointments' },
+    { icon: '📅', label: 'นัดหมาย', description: 'ตารางนัดหมายของฉัน', path: '/doctor/appointments', active: window.location.pathname === '/doctor/appointments' },
+    { icon: '🩺', label: 'คิวตรวจ', description: 'คิวคนไข้วันนี้', path: '/doctor/queue', active: window.location.pathname === '/doctor/queue' },
+    { icon: '💊', label: 'คลังยา', description: 'ตรวจสอบยาคงเหลือ', path: '/doctor/pharmacy', active: window.location.pathname === '/doctor/pharmacy' },
     { icon: '📋', label: 'ประวัติการรักษา', description: 'ดูประวัติการรักษา', path: '/doctor/records' },
-    { icon: '💊', label: 'ใบสั่งยา', description: 'จัดการใบสั่งยา', path: '/doctor/prescriptions' },
-    { icon: '📊', label: 'รายงาน', description: 'ดูรายงานทางการแพทย์', path: '/doctor/reports' }
+    { icon: '💰', label: 'รายได้', description: 'รายงานรายได้ค่าแพทย์', path: '/doctor/income', active: window.location.pathname === '/doctor/income' }
   ]
 
   const handleMenuClick = (path) => {
@@ -57,11 +58,10 @@ function DoctorHeader({ currentUser, userRole, onLogout, children }) {
               <button
                 key={index}
                 onClick={() => handleMenuClick(item.path)}
-                className={`flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  item.active
+                className={`flex items-center gap-2 px-4 py-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${item.active
                     ? 'border-emerald-500 text-emerald-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <span className="text-lg">{item.icon}</span>
                 <div className="text-left">

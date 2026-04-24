@@ -24,19 +24,78 @@ export function AuthProvider({ children }) {
   const [userRole, setUserRole] = useState('')
   const [loading, setLoading] = useState(true)
 
-  const register = async (email, password, role) => {
+  const register = async (email, password, role, firstName = '', lastName = '') => {
     const result = await createUserWithEmailAndPassword(auth, email, password)
     const user = result.user
     const userDoc = doc(db, 'users', user.uid)
 
-    await setDoc(userDoc, {
+    const userData = {
       email: user.email,
       role,
       createdAt: serverTimestamp()
-    })
+    }
+
+    // Add name fields for doctor role
+    if (role.toLowerCase() === 'doctor') {
+      userData.firstName = firstName
+      userData.lastName = lastName
+    }
+
+    await setDoc(userDoc, userData)
 
     setUserRole(role.toLowerCase())
     return result
+  }
+
+  // Admin function to create user without signing in
+  const createUser = async (email, password, role, firstName = '', lastName = '') => {
+    try {
+      const apiKey = import.meta.env.VITE_FIREBASE_API_KEY
+      if (!apiKey) {
+        throw new Error('Firebase API key is not configured')
+      }
+
+      const response = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: false
+          })
+        }
+      )
+
+      const data = await response.json()
+      if (!response.ok) {
+        const errorMessage = data.error?.message || 'ไม่สามารถสร้างผู้ใช้ใหม่ได้'
+        throw new Error(errorMessage)
+      }
+
+      const uid = data.localId
+      if (!uid) {
+        throw new Error('ไม่พบ UID ของผู้ใช้ที่สร้าง')
+      }
+
+      const userDoc = doc(db, 'users', uid)
+      const userData = {
+        email,
+        role,
+        createdAt: serverTimestamp()
+      }
+
+      if (role.toLowerCase() === 'doctor') {
+        userData.firstName = firstName
+        userData.lastName = lastName
+      }
+
+      await setDoc(userDoc, userData)
+      return { uid, email, role }
+    } catch (error) {
+      throw error
+    }
   }
 
   const login = async (email, password) => {
@@ -96,7 +155,8 @@ export function AuthProvider({ children }) {
     loading,
     login,
     logout,
-    register
+    register,
+    createUser
   }
 
   return (

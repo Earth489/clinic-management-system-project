@@ -23,12 +23,7 @@ const IconBack = () => (
     <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
   </svg>
 )
-const IconEye = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-  </svg>
-)
+
 
 // ──────────────────────────────────────────────
 // Main Component
@@ -102,11 +97,11 @@ function DoctorPatientManagement() {
                   <th className="px-4 py-3 font-semibold whitespace-nowrap">HN</th>
                   <th className="px-4 py-3 font-semibold whitespace-nowrap">ชื่อ</th>
                   <th className="px-4 py-3 font-semibold whitespace-nowrap">นามสกุล</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">เพศ</th>
                   <th className="px-4 py-3 font-semibold whitespace-nowrap">วันเกิด</th>
                   <th className="px-4 py-3 font-semibold whitespace-nowrap">เบอร์โทร</th>
                   <th className="px-4 py-3 font-semibold whitespace-nowrap">ที่อยู่</th>
                   <th className="px-4 py-3 font-semibold whitespace-nowrap">ประวัติแพ้ยา</th>
-                  <th className="px-4 py-3 font-semibold text-center whitespace-nowrap">ดูรายละเอียด</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -129,6 +124,7 @@ function DoctorPatientManagement() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">{patient.firstname}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{patient.lastname}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">{patient.gender || '-'}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {patient.birthdate ? new Date(patient.birthdate).toLocaleDateString('th-TH') : '-'}
                       </td>
@@ -148,16 +144,6 @@ function DoctorPatientManagement() {
                                 </span>
                               ))
                             : <span className="text-gray-400 text-xs">ไม่มี</span>}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-center">
-                          <button
-                            className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-                            title="ดูรายละเอียด"
-                          >
-                            <IconEye />
-                          </button>
                         </div>
                       </td>
                     </tr>
